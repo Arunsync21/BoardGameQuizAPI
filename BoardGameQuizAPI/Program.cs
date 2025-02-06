@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using PdfSharp.Fonts;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -80,6 +81,8 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<CertificateService>();
+
 
 var app = builder.Build();
 
@@ -88,7 +91,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+// Get IWebHostEnvironment instance
+var webHostEnvironment = app.Services.GetRequiredService<IWebHostEnvironment>();
 
+// Register the font resolver
+GlobalFontSettings.FontResolver = new CustomFontResolver(webHostEnvironment);
 app.UseCors("AllowSpecificOrigin");
 
 app.UseHttpsRedirection();
