@@ -7,6 +7,7 @@
         public int SetId { get; set; }
         public int SectionId { get; set; }
         public bool IsCompleted { get; set; }
+        public int ScoreObtained { get; set; }
         public DateTime? CompletedAt { get; set; }
     }
 }

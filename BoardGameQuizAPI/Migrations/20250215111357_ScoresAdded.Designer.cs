@@ -4,6 +4,7 @@ using BoardGameQuizAPI.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BoardGameQuizAPI.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250215111357_ScoresAdded")]
+    partial class ScoresAdded
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.1");
@@ -96,9 +99,6 @@ namespace BoardGameQuizAPI.Migrations
                     b.Property<int>("SectionId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("SetId")
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("TimeLimit")
                         .HasColumnType("INTEGER");
 
@@ -109,8 +109,6 @@ namespace BoardGameQuizAPI.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.HasIndex("SectionId");
-
-                    b.HasIndex("SetId");
 
                     b.ToTable("Questions");
                 });
@@ -299,15 +297,7 @@ namespace BoardGameQuizAPI.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("BoardGameQuizAPI.Models.Set", "Set")
-                        .WithMany()
-                        .HasForeignKey("SetId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Section");
-
-                    b.Navigation("Set");
                 });
 
             modelBuilder.Entity("BoardGameQuizAPI.Models.UserProgress", b =>

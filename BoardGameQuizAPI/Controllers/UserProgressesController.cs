@@ -30,7 +30,8 @@ namespace BoardGameQuizAPI.Controllers
                     SetId = dto.SetId,
                     SectionId = dto.SectionId,
                     IsCompleted = dto.IsCompleted,
-                    CompletedAt = dto.CompletedAt
+                    CompletedAt = dto.CompletedAt,
+                    ScoreObtained = dto.ScoreObtained
                 };
 
                 _context.UserProgresses.Add(userProgress);

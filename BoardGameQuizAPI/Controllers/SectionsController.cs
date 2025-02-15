@@ -85,5 +85,28 @@ namespace BoardGameQuizAPI.Controllers
 
             return Ok("Sections added successfully.");
         }
+
+        [HttpDelete]
+        public async Task<IActionResult> DeleteSections([FromBody] List<int> sectionIds)
+        {
+            if (sectionIds == null || !sectionIds.Any())
+            {
+                return BadRequest("No section IDs provided.");
+            }
+
+            // Fetch sections that match the given IDs
+            var sectionsToDelete = _context.Sections.Where(s => sectionIds.Contains(s.SectionId)).ToList();
+
+            if (!sectionsToDelete.Any())
+            {
+                return NotFound("No matching sections found.");
+            }
+
+            _context.Sections.RemoveRange(sectionsToDelete);
+            await _context.SaveChangesAsync();
+
+            return Ok("Sections deleted successfully.");
+        }
+
     }
 }

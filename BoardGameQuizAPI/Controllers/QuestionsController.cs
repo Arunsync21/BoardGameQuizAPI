@@ -16,13 +16,13 @@ namespace BoardGameQuizAPI.Controllers
             _context = context;
         }
 
-        [HttpGet("section/{sectionId}")]
-        public async Task<IActionResult> GetQuestionsWithOptions(int sectionId)
+        [HttpGet("set/{setId}/section/{sectionId}")]
+        public async Task<IActionResult> GetQuestionsWithOptions(int setId, int sectionId)
         {
             var questions = await (from q in _context.Questions
                                    join o in _context.Options
                                        on q.QuestionId equals o.QuestionId into options
-                                   where q.SectionId == sectionId
+                                   where q.SectionId == sectionId && q.SetId == setId
                                    select new
                                    {
                                        q.QuestionId,
@@ -47,18 +47,19 @@ namespace BoardGameQuizAPI.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddQuestion([FromBody] QuestionDto dto)
+        public async Task<IActionResult> AddQuestions([FromBody] List<QuestionDto> questionDtos)
         {
-            if (dto == null)
+            if (questionDtos == null || !questionDtos.Any())
             {
-                return BadRequest("No question provided.");
+                return BadRequest("No questions provided.");
             }
 
             try
             {
-                var question = new Question
+                var questions = questionDtos.Select(dto => new Question
                 {
                     SectionId = dto.SectionId,
+                    SetId = dto.SetId,
                     QuestionId = dto.QuestionId,
                     QuestionType = dto.QuestionType,
                     QuestionText = dto.QuestionText,
@@ -66,16 +67,18 @@ namespace BoardGameQuizAPI.Controllers
                     ImageUrl = dto.ImageUrl,
                     VideoUrl = dto.VideoUrl,
                     TimeLimit = dto.TimeLimit
-                };
+                }).ToList();
 
-                _context.Questions.Add(question);
+                _context.Questions.AddRange(questions);
                 await _context.SaveChangesAsync();
-                return Ok("Question added successfully.");
+
+                return Ok("Questions added successfully.");
             }
             catch (Exception ex)
             {
-                return StatusCode(500, "An error occurred while adding the question.");
+                return StatusCode(500, "An error occurred while adding the questions.");
             }
         }
+
     }
 }

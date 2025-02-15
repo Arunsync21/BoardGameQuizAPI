@@ -4,6 +4,7 @@
     {
         public int ProgressId { get; set; }
         public int UserId { get; set; }
+        public int ScoreObtained { get; set; }
         public User User { get; set; }
         public int SetId { get; set; }
         public Set Set { get; set; }
