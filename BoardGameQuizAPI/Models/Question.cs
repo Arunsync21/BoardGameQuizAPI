@@ -3,6 +3,8 @@
     public class Question
     {
         public int QuestionId { get; set; }
+        public int RoleId { get; set; }
+        public Role Role { get; set; }
         public int SetId { get; set; }
         public Set Set { get; set; }
         public int SectionId { get; set; }

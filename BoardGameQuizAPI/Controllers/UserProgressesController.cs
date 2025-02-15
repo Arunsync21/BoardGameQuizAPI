@@ -27,6 +27,7 @@ namespace BoardGameQuizAPI.Controllers
                 var userProgress = new UserProgress
                 {
                     UserId = dto.UserId,
+                    RoleId = dto.RoleId,
                     SetId = dto.SetId,
                     SectionId = dto.SectionId,
                     IsCompleted = dto.IsCompleted,

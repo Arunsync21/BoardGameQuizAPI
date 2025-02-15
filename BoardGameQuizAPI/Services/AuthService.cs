@@ -30,7 +30,7 @@ namespace BoardGameQuizAPI.Services
             new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
             new Claim(ClaimTypes.Name, user.Name),
             new Claim(ClaimTypes.Email, user.Email),
-            new Claim(ClaimTypes.MobilePhone, user.MobileNumber)
+            new Claim(ClaimTypes.MobilePhone, user.Mobile)
         };
 
             var token = new JwtSecurityToken(
@@ -48,7 +48,7 @@ namespace BoardGameQuizAPI.Services
             return new LoginResponseModel
             {
                 AccessToken = accessToken,
-                UserName = user.Name,
+                User = user,
                 ExpiresIn = (int)tokenExpiryTimeStamp.Subtract(DateTime.UtcNow).TotalSeconds
             };
         }
@@ -57,7 +57,7 @@ namespace BoardGameQuizAPI.Services
         {
             var user = _context.Users.SingleOrDefault(u =>
                 u.Name == login.UserName &&
-                u.MobileNumber == login.Mobile &&
+                u.Mobile == login.Mobile &&
                 u.Email == login.Email);
 
             if (user == null)

@@ -60,6 +60,7 @@ namespace BoardGameQuizAPI.Controllers
                 {
                     SectionId = dto.SectionId,
                     SetId = dto.SetId,
+                    RoleId = dto.RoleId,
                     QuestionId = dto.QuestionId,
                     QuestionType = dto.QuestionType,
                     QuestionText = dto.QuestionText,
@@ -80,5 +81,33 @@ namespace BoardGameQuizAPI.Controllers
             }
         }
 
+        [HttpDelete]
+        public async Task<IActionResult> DeleteQuestions([FromBody] List<int> questionIds)
+        {
+            if (questionIds == null || !questionIds.Any())
+            {
+                return BadRequest("No set IDs provided.");
+            }
+
+            // Fetch the sets that match the given IDs
+            var questionsToDelete = _context.Questions.Where(s => questionIds.Contains(s.QuestionId)).ToList();
+
+            if (!questionsToDelete.Any())
+            {
+                return NotFound("No matching questions found.");
+            }
+
+            try
+            {
+                _context.Questions.RemoveRange(questionsToDelete);
+                await _context.SaveChangesAsync();
+
+                return Ok("Questions deleted successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while deleting questions.");
+            }
+        }
     }
 }

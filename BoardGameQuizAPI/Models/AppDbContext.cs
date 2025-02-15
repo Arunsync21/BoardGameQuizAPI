@@ -6,6 +6,7 @@ namespace BoardGameQuizAPI.Models
     public class AppDbContext : DbContext
     {
         public DbSet<User> Users { get; set; }
+        public DbSet<Role> Roles { get; set; }
         public DbSet<Set> Sets { get; set; }
         public DbSet<Section> Sections { get; set; }
         public DbSet<Question> Questions { get; set; }
@@ -18,7 +19,7 @@ namespace BoardGameQuizAPI.Models
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseSqlite("Data Source=boardgamequiz.db");
+            optionsBuilder.UseSqlite("Data Source=boardgame.db");
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,6 +27,10 @@ namespace BoardGameQuizAPI.Models
             // Define primary keys and configure them as identity columns
             modelBuilder.Entity<User>()
                 .HasKey(u => u.UserId)
+                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity<Role>()
+                .HasKey(u => u.RoleId)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
             modelBuilder.Entity<Set>()
@@ -77,6 +82,20 @@ namespace BoardGameQuizAPI.Models
                 .HasOne(up => up.Section)
                 .WithMany()
                 .HasForeignKey(up => up.SectionId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Section to Question (One-to-Many)
+            modelBuilder.Entity<Question>()
+                .HasOne(q => q.Role)
+                .WithMany()
+                .HasForeignKey(q => q.RoleId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Set to Question (One-to-Many)
+            modelBuilder.Entity<Question>()
+                .HasOne(q => q.Set)
+                .WithMany()
+                .HasForeignKey(q => q.SetId)
                 .OnDelete(DeleteBehavior.Cascade);
 
             // Section to Question (One-to-Many)

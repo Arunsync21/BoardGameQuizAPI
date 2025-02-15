@@ -1,5 +1,4 @@
 ﻿using BoardGameQuizAPI.Models;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -32,9 +31,9 @@ namespace BoardGameQuizAPI.Controllers
         }
 
         [HttpGet("check-login")]
-        public async Task<IActionResult> CheckPreviousLogin([FromQuery] string email, [FromQuery] string mobileNumber, [FromQuery] string userName)
+        public async Task<IActionResult> CheckPreviousLogin([FromQuery] string email, [FromQuery] string mobile, [FromQuery] string userName)
         {
-            if (string.IsNullOrEmpty(email) && string.IsNullOrEmpty(mobileNumber))
+            if (string.IsNullOrEmpty(email) && string.IsNullOrEmpty(mobile))
             {
                 return BadRequest("Please provide either an email or a mobile number.");
             }
@@ -42,15 +41,15 @@ namespace BoardGameQuizAPI.Controllers
             var user = await _context.Users
                 .FirstOrDefaultAsync(u =>
                     (!string.IsNullOrEmpty(email) && u.Email == email) ||
-                    (!string.IsNullOrEmpty(mobileNumber) && u.MobileNumber == mobileNumber));
+                    (!string.IsNullOrEmpty(mobile) && u.Mobile == mobile));
 
             if (user == null)
             {
                 return NotFound("User not found. You can proceed with enrollment.");
             }
 
-            if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(mobileNumber) &&
-                user.Email == email && user.MobileNumber == mobileNumber)
+            if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(mobile) &&
+                user.Email == email && user.Mobile == mobile)
             {
                 var userDetails = new
                 {
@@ -61,7 +60,7 @@ namespace BoardGameQuizAPI.Controllers
             }
 
             if ((!string.IsNullOrEmpty(email) && user.Email == email) ||
-                (!string.IsNullOrEmpty(mobileNumber) && user.MobileNumber == mobileNumber))
+                (!string.IsNullOrEmpty(mobile) && user.Mobile == mobile))
             {
                 string message = user.Email == email
                     ? "An account with the same email already exists. Please use a different email for enrollment."
@@ -94,6 +93,23 @@ namespace BoardGameQuizAPI.Controllers
             }
 
             user.Role = updatedUser.Role; // Update role or other details
+            _context.Users.Update(user);
+            await _context.SaveChangesAsync();
+
+            return Ok(user);
+        }
+
+        [HttpPut("update-role/{userId}/{role}")]
+        public async Task<IActionResult> UpdateUser(int userId, string role)
+        {
+            var user = await _context.Users.FindAsync(userId);
+
+            if (user == null)
+            {
+                return NotFound("User not found.");
+            }
+
+            user.Role = role;
             _context.Users.Update(user);
             await _context.SaveChangesAsync();
 

@@ -5,8 +5,6 @@
         Mr,
         Mrs,
         Ms,
-        Mx,
-        Dr,
-        Prof
+        Dr
     }
 }

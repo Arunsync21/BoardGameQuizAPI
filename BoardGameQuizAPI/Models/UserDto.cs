@@ -2,9 +2,8 @@
 
 namespace BoardGameQuizAPI.Models
 {
-    public class User
+    public class UserDto
     {
-        public int UserId { get; set; }
         public string Name { get; set; }
         public string Designation { get; set; }
         public string Department { get; set; }
@@ -12,6 +11,5 @@ namespace BoardGameQuizAPI.Models
         public string Email { get; set; }
         public Title Title { get; set; }
         public string? Role { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }
 }
