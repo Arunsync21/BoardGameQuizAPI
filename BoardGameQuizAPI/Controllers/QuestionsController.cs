@@ -16,13 +16,13 @@ namespace BoardGameQuizAPI.Controllers
             _context = context;
         }
 
-        [HttpGet("set/{setId}/section/{sectionId}")]
-        public async Task<IActionResult> GetQuestionsWithOptions(int setId, int sectionId)
+        [HttpGet("set/{setId}/section/{sectionId}/role/{roleId}")]
+        public async Task<IActionResult> GetQuestionsWithOptions(int setId, int sectionId, int roleId)
         {
             var questions = await (from q in _context.Questions
                                    join o in _context.Options
                                        on q.QuestionId equals o.QuestionId into options
-                                   where q.SectionId == sectionId && q.SetId == setId
+                                   where q.SectionId == sectionId && q.SetId == setId && q.RoleId == roleId
                                    select new
                                    {
                                        q.QuestionId,
@@ -81,6 +81,41 @@ namespace BoardGameQuizAPI.Controllers
             }
         }
 
+        [HttpPut]
+        public async Task<IActionResult> UpdateQuestionsSetId([FromBody] UpdateQuestionsSetDto updateDto)
+        {
+            if (updateDto == null || updateDto.QuestionIds == null || !updateDto.QuestionIds.Any())
+            {
+                return BadRequest("No question IDs provided.");
+            }
+
+            try
+            {
+                var questions = await _context.Questions
+                                              .Where(q => updateDto.QuestionIds.Contains(q.QuestionId))
+                                              .ToListAsync();
+
+                if (!questions.Any())
+                {
+                    return NotFound("No matching questions found.");
+                }
+
+                foreach (var question in questions)
+                {
+                    question.SectionId = updateDto.SectionId; // Update SetId
+                }
+
+                await _context.SaveChangesAsync();
+
+                return Ok("Questions updated successfully.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "An error occurred while updating the questions.");
+            }
+        }
+
+
         [HttpDelete]
         public async Task<IActionResult> DeleteQuestions([FromBody] List<int> questionIds)
         {
@@ -109,5 +144,11 @@ namespace BoardGameQuizAPI.Controllers
                 return StatusCode(500, "An error occurred while deleting questions.");
             }
         }
+        public class UpdateQuestionsSetDto
+        {
+            public int SectionId { get; set; } // New SetId to assign
+            public List<int> QuestionIds { get; set; } // List of Question IDs to update
+        }
+
     }
 }
