@@ -13,6 +13,6 @@
         public Section Section { get; set; }
         public int ScoreObtained { get; set; }
         public bool IsCompleted { get; set; }
-        public DateTime? CompletedAt { get; set; }
+        public DateTime CompletedAt { get; set; } = DateTime.UtcNow;
     }
 }

@@ -32,23 +32,30 @@ namespace BoardGameQuizAPI.Controllers
             return Ok(set);
         }
 
-        [HttpGet("user/{userId}")]
-        public async Task<IActionResult> GetSetsWithProgress(int userId)
+        [HttpGet("user/{userId}/role/{roleId}")]
+        public async Task<IActionResult> GetSetsWithProgress(int userId, int roleId)
         {
-            var sets = await (from s in _context.Sets
-                              join up in _context.UserProgresses
-                                  on new { s.SetId, UserId = userId } equals new { up.SetId, up.UserId } into userProgresses
-                              from up in userProgresses.DefaultIfEmpty()
-                              select new
-                              {
-                                  s.SetId,
-                                  s.SetName,
-                                  IsCompleted = up != null && up.IsCompleted
-                              })
-                      .Distinct()
-                      .ToListAsync();
+            var setsWithProgress = await _context.Sets
+                .Select(s => new
+                {
+                    s.SetId,
+                    s.SetName,
+                    TotalSections = 8, // Since there are always 8 sections per set
+                    CompletedSections = _context.UserProgresses.Count(up =>
+                        up.SetId == s.SetId &&
+                        up.UserId == userId &&
+                        up.RoleId == roleId &&
+                        up.IsCompleted)
+                })
+                .Select(s => new
+                {
+                    s.SetId,
+                    s.SetName,
+                    IsCompleted = s.CompletedSections == s.TotalSections
+                })
+                .ToListAsync();
 
-            return Ok(sets);
+            return Ok(setsWithProgress);
         }
 
         [HttpPost]

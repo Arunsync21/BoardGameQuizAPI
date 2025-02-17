@@ -52,24 +52,43 @@ namespace BoardGameQuizAPI.Controllers
             return Ok(section);
         }
 
-        [HttpGet("set/{setId}/user/{userId}")]
-        public async Task<IActionResult> GetSectionsWithProgress(int setId, int userId)
+        [HttpGet("set/{setId}/user/{userId}/role/{roleId}")]
+        public async Task<IActionResult> GetSectionsWithProgress(int setId, int userId, int roleId)
         {
             var sections = await (from s in _context.Sections
                                   join up in _context.UserProgresses
-                                      on s.SectionId equals up.SectionId into userProgresses
+                                      on new { s.SectionId, SetId = setId, UserId = userId, RoleId = roleId }
+                                      equals new { up.SectionId, up.SetId, up.UserId, up.RoleId } into userProgresses
                                   from up in userProgresses.DefaultIfEmpty()
-                                  where up.SetId == setId && (up == null || up.UserId == userId)
                                   select new
                                   {
                                       s.SectionId,
                                       s.SectionName,
                                       IsCompleted = up != null && up.IsCompleted
                                   })
-                                  .Distinct()
                                   .ToListAsync();
 
             return Ok(sections);
+        }
+
+        [HttpGet("set/{setId}/user/{userId}/role/{roleId}/summary")]
+        public async Task<IActionResult> GetCompletionStatusAndTotalScore(int setId, int userId, int roleId)
+        {
+            var userProgress = await _context.UserProgresses
+                .Where(up => up.SetId == setId && up.UserId == userId && up.RoleId == roleId)
+                .ToListAsync();
+
+            // Check if all 8 sections are completed
+            bool isAllSectionsCompleted = userProgress.Count == 8 && userProgress.All(up => up.IsCompleted);
+
+            // Calculate total score for the 8 sections
+            int totalScore = userProgress.Sum(up => up.ScoreObtained);
+
+            return Ok(new
+            {
+                IsAllSectionsCompleted = isAllSectionsCompleted,
+                TotalScore = totalScore
+            });
         }
 
         [HttpPost]
